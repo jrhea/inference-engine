@@ -1,0 +1,69 @@
+
+Nvidia Driver
+1) pre install
+-install gcc:
+-install driver (NVIDIA doesn't support ubuntu 18.04 so this is custom):
+sudo add-apt-repository ppa:graphics-drivers/ppa
+sudo apt install nvidia-driver-396
+- install cuda toolkit:
+cuda deps:
+sudo apt-get install freeglut3 freeglut3-dev libxi-dev libxmu-dev
+base: wget https://developer.nvidia.com/compute/cuda/9.2/Prod2/local_installers/cuda_9.2.148_396.37_linux
+patch1: wget https://developer.nvidia.com/compute/cuda/9.2/Prod2/patches/1/cuda_9.2.148.1_linux
+#select No for installing nvidia driver
+sudo sh cuda_9.2.148_396.37_linux
+#install patch
+sudo sh cuda_9.2.148.1_linux
+To configure the CUDA environment for all users (and applications) on your system create the file (use sudo and a text editor of your choice)
+/etc/profile.d/cuda.sh
+with the following content,
+export PATH=$PATH:/usr/local/cuda/bin
+export CUDADIR=/usr/local/cuda
+Also create the file,
+/etc/ld.so.conf.d/cuda.conf
+and add the line,
+/usr/local/cuda/lib64
+Then run
+sudo ldconfig
+
+#test out install by building the samples
+cd /home/pcml-user/NVIDIA_CUDA-9.2_Samples
+make -j4
+
+#restart machine and test sample
+cd  /home/pcml-user/NVIDIA_CUDA-9.2_Samples/bin/x86_64/linux/release/
+./nbody -benchmark -numbodies=3 -compare
+Run “nbody -benchmark [-numbodies=<numBodies>]” to measure performance.
+	-fullscreen       (run n-body simulation in fullscreen mode)
+	-fp64             (use double precision floating point values for simulation)
+	-hostmem          (stores simulation data in host memory)
+	-benchmark        (run benchmark to measure performance)
+	-numbodies=<N>    (number of bodies (>= 1) to run in simulation)
+	-device=<d>       (where d=0,1,2.... for the CUDA device to use)
+	-numdevices=<i>   (where i=(number of CUDA devices > 0) to use for simulation)
+	-compare          (compares simulation results running once on the default GPU and once on the CPU)
+	-cpu              (run n-body simulation on the CPU)
+	-tipsy=<file.bin> (load a tipsy model file for simulation)
+
+NOTE: The CUDA Samples are not meant for performance measurements. Results may vary when GPU Boost is enabled.
+
+> Windowed mode
+> Simulation data stored in video memory
+> Single precision floating point simulation
+> 1 Devices used for simulation
+GPU Device 0: “Tesla K80" with compute capability 3.7
+
+> Compute 3.7 CUDA device: [Tesla K80]
+Warning: “number of bodies” specified 3 is not a multiple of 256.
+Rounding up to the nearest multiple: 256.
+256 bodies, total time for 10 iterations: 0.385 ms
+= 1.703 billion interactions per second
+= 34.051 single-precision GFLOP/s at 20 flops per interaction
+
+2)install docker
+instructions: https://docs.docker.com/v17.09/engine/installation/linux/docker-ce/ubuntu/#install-docker-ce-1
+add user to docker group so it doesn't have to be run from sudo:
+ - sudo gpasswd -a pcml-user docker
+ - newgrp docker
+ 
+ 
